@@ -1,9 +1,11 @@
+import json
 import random
 import time
 from socket import socket, AF_INET, SOCK_STREAM
 import string
 from struct import pack, unpack
 from threading import Thread, Event
+from typing import Any
 
 PORT = 0x2BAD
 NB_LETTERS_WIN = 30
@@ -25,9 +27,10 @@ class Player(Thread):
     def run(self):
         global ready_event
 
-        self._sock.send(pack('!i', self._id))
-        isReady = self._sock.recv(1)
-        self._choice = unpack("?", isReady)[0]
+        self._sock.send(create_json("idjoueur",self._id))
+        
+        isReady = self._sock.recv(4096)
+        self._choice = read_json(isReady)
         if all_players_ready():
             starter_time = time.time()
             while True:
@@ -81,6 +84,16 @@ def find_player_id():
             return i+1
     players.append(None)
     return len(players)
+
+def create_json(method : str, params : Any):
+    data = {"jsonrpc": "2.0", "method": method,"params": params}
+    return json.dumps(data).encode()
+    
+def read_json(data : bytes):
+    
+    dict= json.loads(data.decode())
+    value = dict["params"]
+    return value
 
 if __name__ == '__main__':
     with socket(AF_INET, SOCK_STREAM) as sock_listen:

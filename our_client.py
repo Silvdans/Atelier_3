@@ -1,14 +1,25 @@
+import json
 from socket import socket, AF_INET, SOCK_STREAM
 from struct import pack, unpack
+from typing import Any
 from xmlrpc.client import boolean
 
 PORT = 0x2BAD
 SERVER = "127.0.0.1"
 
+def create_json(method : str, param : Any):
+    data = {"jsonrpc": "2.0", "method": method, "params": param}
+    return json.dumps(data).encode()
+
+def read_json(data : str):
+    dict= json.loads(data.decode())
+    value = dict["params"]
+    return value
+
 if __name__ == '__main__':
     with socket(AF_INET, SOCK_STREAM) as sock:
         sock.connect((SERVER, PORT))
-        num = unpack('!i', sock.recv(4))[0]
+        num = read_json(sock.recv(4096))
         print(f"You're player {num}")
         isReady = False
         gameEnded = False
@@ -17,7 +28,7 @@ if __name__ == '__main__':
                 content = input().lower()
                 if(content == "r"):
                     isReady = True
-                    sock.send(pack('?', isReady))
+                    sock.send(create_json("test", isReady))
         while not gameEnded:
             first_letter = sock.recv(4096).decode('utf-8')
             wordIsCorrect = False
@@ -43,3 +54,4 @@ if __name__ == '__main__':
                 print(f"Votre score est de {score}")
         
         sock.close()
+
