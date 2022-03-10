@@ -35,10 +35,11 @@ class Player(Thread):
             starter_time = time.time()
             while True:
                 first_letter = random.choice(string.ascii_letters).lower()                
-                self._sock.send(first_letter.encode())
+                # self._sock.send(first_letter.encode())
+                self._sock.send(create_json("first_letter",first_letter))
                 wordIsCorrect = False
                 while(not wordIsCorrect):
-                    word = self._sock.recv(4096).decode()
+                    word = read_json(self._sock.recv(4096))#MOT Reception
                     if not (word[0] == first_letter):
                         #Si 1, mauvaise premiere lettre
                         self._sock.send(pack('!i', 1)) #Envoie code associé au mot

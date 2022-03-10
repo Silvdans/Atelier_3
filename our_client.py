@@ -12,14 +12,14 @@ def create_json(method : str, param : Any):
     return json.dumps(data).encode()
 
 def read_json(data : str):
-    dict= json.loads(data.decode())
+    dict= json.loads(data)
     value = dict["params"]
     return value
 
 if __name__ == '__main__':
     with socket(AF_INET, SOCK_STREAM) as sock:
         sock.connect((SERVER, PORT))
-        num = read_json(sock.recv(4096))
+        num = read_json(sock.recv(4096).decode())
         print(f"You're player {num}")
         isReady = False
         gameEnded = False
@@ -28,13 +28,13 @@ if __name__ == '__main__':
                 content = input().lower()
                 if(content == "r"):
                     isReady = True
-                    sock.send(create_json("test", isReady))
+                    sock.send(create_json("playerStatus", isReady))
         while not gameEnded:
-            first_letter = sock.recv(4096).decode('utf-8')
+            first_letter = read_json(sock.recv(4096).decode('utf-8')) #FIRST_LETTER RECEPTION
             wordIsCorrect = False
             while (not wordIsCorrect):
                 content = input(f"Veuillez rentrer un mot commençant par {first_letter} \n").lower()
-                sock.send(content.encode())
+                sock.send(create_json("Mot",content))#MOT ENVOI
                 wordCode = unpack('!i', sock.recv(4))[0]  #Reception code associé au mot
                 score = unpack('!i', sock.recv(4))[0]
                 if(wordCode == 0):
