@@ -8,10 +8,10 @@ PORT = 0x2BAD
 SERVER = "127.0.0.1"
 
 def create_json(method : str, param : Any):
-    data = {"jsonrpc": "2.0", "method": method, "params": param}
+    data = {"jsonrpc": "2.0", "method": method, "params": [param]}
     return json.dumps(data).encode()
 
-def read_json(data : str):
+def read_json(data : Any):
     dict= json.loads(data)
     value = dict["params"]
     return value
@@ -30,23 +30,29 @@ if __name__ == '__main__':
                     isReady = True
                     sock.send(create_json("playerStatus", isReady))
         while not gameEnded:
-            first_letter = read_json(sock.recv(4096).decode('utf-8')) #FIRST_LETTER RECEPTION
+            first_letter = read_json(sock.recv(4096).decode('utf-8'))#FIRST_LETTER RECEPTION
             wordIsCorrect = False
             while (not wordIsCorrect):
                 content = input(f"Veuillez rentrer un mot commençant par {first_letter} \n").lower()
                 sock.send(create_json("Mot",content))#MOT ENVOI
-                wordCode = unpack('!i', sock.recv(4))[0]  #Reception code associé au mot
-                score = unpack('!i', sock.recv(4))[0]
-                if(wordCode == 0):
+
+                dataSocket : dict = read_json(sock.recv(4096).decode())
+                print(dataSocket)
+                wordCode =dataSocket["WordStatus"]
+                print("mon code :" +wordCode)
+                score = dataSocket["intScore"]
+                print("mon score :" +score)
+
+                if(wordCode == "0"):
                     print("Mot correct")
                     wordIsCorrect = True
-                elif(wordCode == 1):
+                elif(wordCode == "1"):
                     print("Mauvaise première lettre")
-                elif(wordCode == 2):
+                elif(wordCode == "2"):
                     print("Le mot n'existe pas, il ne fallait pas sécher les cours de français au collège en classe de 6ème B (la classe basket).")
-                elif(wordCode == 3):
+                elif(wordCode == "3"):
                     print("Vous avez gagner la partie !")
-                    timer = unpack('!f', sock.recv(4))[0]
+                    timer = json.loads(dataSocket)["timer"]
                     print(f"Vous avez mis {timer} secondes")
                     gameEnded = True
                     break
