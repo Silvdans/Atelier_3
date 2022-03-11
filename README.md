@@ -1,4 +1,4 @@
-# Atelier_2_Archi_client_serveur
+# Atelier_3_Archi_client_serveur
 
 Loic Delpierre
 Mathis Reclus
