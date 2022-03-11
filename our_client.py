@@ -12,7 +12,7 @@ def create_json(method : str, param : Any):
     return json.dumps(data).encode()
 
 def read_json(data : Any):
-    dict= json.loads(data)
+    dict = json.loads(data)
     value = dict["params"]
     return value
 
@@ -37,11 +37,8 @@ if __name__ == '__main__':
                 sock.send(create_json("Mot",content))#MOT ENVOI
 
                 dataSocket : dict = read_json(sock.recv(4096).decode())
-                print(dataSocket)
-                wordCode =dataSocket["WordStatus"]
-                print("mon code :" +wordCode)
-                score = dataSocket["intScore"]
-                print("mon score :" +score)
+                wordCode = dataSocket["WordStatus"]
+                score: int = dataSocket["intScore"]
 
                 if(wordCode == "0"):
                     print("Mot correct")
@@ -52,7 +49,7 @@ if __name__ == '__main__':
                     print("Le mot n'existe pas, il ne fallait pas sécher les cours de français au collège en classe de 6ème B (la classe basket).")
                 elif(wordCode == "3"):
                     print("Vous avez gagner la partie !")
-                    timer = json.loads(dataSocket)["timer"]
+                    timer = dataSocket["timer"]
                     print(f"Vous avez mis {timer} secondes")
                     gameEnded = True
                     break

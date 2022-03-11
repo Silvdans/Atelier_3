@@ -42,7 +42,7 @@ class Player(Thread):
                     word =word_dansliste[0]
                     if not (word[0] == first_letter):
                         #Si 1, mauvaise premiere lettre
-                        self._sock.send(create_json_dict("wordStatus",{"WordStatus": "1"})) #Envoie code associé au mot
+                        self._sock.send(create_json_dict("wordStatus",{"WordStatus": "1","intScore": self._nbletters})) #Envoie code associé au mot
                     elif word in list_of_words:
                         # Si 3, mot conforme et parte finie
                         self._nbletters += len(word) 
@@ -62,7 +62,8 @@ class Player(Thread):
                             wordIsCorrect = True
                     else:
                         #Si 2 mot qui n'existe pas
-                        self._sock.send(create_json("wordStatus","2"))
+                        self._sock.send(create_json_dict("WordStatus/intScore",
+                                                         {"WordStatus": "2","intScore":self._nbletters}))
 
 
 def load_list_of_words():
